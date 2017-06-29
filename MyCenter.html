@@ -1,0 +1,265 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SpeakIn聊天机器人 - 个人信息</title>
+    <link href="JSCSS/css/chat.css" rel="stylesheet" />
+    <script src="JSCSS/js/jquery-1.8.2.min.js"></script>
+    <script>
+        function getRequest() {
+            var url = window.location.search; //获取url中"?"符后的字串     
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                for (var i = 0; i < strs.length; i++) {
+                    //就是这句的问题  
+                    theRequest[strs[i].split("=")[0]] = decodeURI(strs[i].split("=")[1]);
+                    //之前用了unescape()  
+                    //才会出现乱码    
+                }
+            }
+            return theRequest;
+        }
+        var arr = getRequest();
+        $(function () {
+            //获取用户ID
+            $("#UserID").val(arr['UserID']);
+            //获取用户ID
+            //显示数据
+            $.ajax({
+                url: "Handler/MyCenter/MyCenterHandler.ashx?action=list",
+                type: "post",
+                data: { UserID: $("#UserID").val() },
+                dataType: "json",
+                success: function (res) {
+                    $("#UserName").text(res.NickName);
+                    $("#Birthday").text(res.Birthday);
+                    $("#imghead").attr("src", res.Avatar);
+                    $("#zzzz").attr("src", res.Avatar);
+                    $("#centerName").text(res.NickName);
+                }
+            });
+            //显示数据
+
+            $("#shouye").click(function () {
+                window.location.href = '/Index.html?UserID=' + $("#UserID").val();
+            });
+
+            $("#picc").change(function () {
+                var formData = new FormData($('#uploadForm')[0]);
+                formData.append('num', '1');//可以在已有表单数据的基础上，继续添加新的键值对
+                $.ajax({
+                    url: 'Handler/MyCenter/MyCenterHandler.ashx?a=touxiang&UserID=' + $("#UserID").val(),
+                    type: 'post',
+                    cache: false,
+                    data: new FormData($('#uploadForm')[0]),
+                    processData: false,
+                    contentType: false
+                }).done(function (res) {
+                    $("#imghead").attr("src", res);
+                    $("#zzzz").attr("src", res);
+                }).fail(function (res) {
+                    alert(222);
+                });
+            });
+        });
+    </script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        html {
+            overflow-y: scroll;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="top">
+        <link href="小米/css/app.css" rel="stylesheet" />
+        <link href="小米/css/simple-line-icons.css" rel="stylesheet" />
+        <link href="小米/css/bootstrap.css" rel="stylesheet" />
+        <div class="app-header navbar">
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" data-toggle="dropdown" class="dropdown-toggle clear" data-toggle="dropdown">
+                        <span class="thumb-sm avatar pull-right m-t-n-sm m-b-n-sm m-l-sm">
+                            <img src="小米/img/hu.jpg" alt="..." id="zzzz" /><!--头像-->
+                        </span>
+                        <span  id="centerName">没有什么不同</span> <b class="caret"></b>
+                    </a>
+                    <!--class="hidden-sm hidden-md"-->
+                    <!-- dropdown -->
+                    <ul class="dropdown-menu animated fadeInRight w">
+                        <li class="wrapper b-b m-b-sm bg-light m-t-n-xs">
+                            <div>
+                                <p>个人信息</p>
+                            </div>
+                            <progressbar value="60" class="progress-xs m-b-none bg-white"></progressbar>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <!--<span class="badge bg-danger pull-right">30%</span>-->
+                                <span id="shouye">返回首页</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a ui-sref="app.docs" href="Login.html">
+                                <span class="label bg-info pull-right">Out</span>
+                                注销
+                            </a>
+                        </li>
+                    </ul>
+                    <!-- / dropdown -->
+                </li>
+            </ul>
+            <!--右上角用户图标-->
+        </div>
+        <div style="clear:both"></div>
+    </div>
+    <script src="小米/js/jquery.min.js"></script>
+    <script src="小米/js/bootstrap.js"></script>
+    <div style="clear: both">
+    </div>
+    <div class="layout">
+
+        <link href="小米/css/reset.css" rel="stylesheet" />
+        <link href="小米/css/layout.css" rel="stylesheet" />
+        <link href="小米/css/modacctip.css" rel="stylesheet" />
+        <div class="n-main-nav clearfix">
+            <ul>
+                <li class="current">
+                    <a title="个人信息">个人信息</a>
+                    <em class="n-nav-corner"></em>
+                </li>
+            </ul>
+        </div>
+        <div class="n-frame">
+            <div class="uinfo c_b">
+                <div class="">
+                    <div class="main_l">
+                        <div class=" t_c">
+                            <div class="na-img-area marauto">
+                                <div class="na-img-bg-area">
+                                    <!-- 头像代码-->
+                                    <div id="preview">
+
+                                        <img title="点击更换头像" id="imghead" src="小米/img/hu.jpg" width="50" height="50" border="0" />
+
+                                    </div>
+
+                                </div>
+                                <em class="na-edit"></em>
+                            </div>
+                            <div class="naImgLink">
+                                <a class="C" title="点击修改头像" id="touxiang">修改头像</a>
+                                <form id="uploadForm" enctype="multipart/form-data">
+                                    <div class="chat02_title_btn ctb02">
+                                        <input id="picc" title="选择图片" type="file" name="picc" />
+                                    </div>
+                                </form>
+                            </div>
+                            <script src="小米/js/Img.js"></script>
+                        </div>
+                    </div>
+                    <div class="main_r">
+                        <div class="framedatabox">
+                            <div class="fdata">
+                                <a class="color4a9 fr" onclick="show()" title="点击编辑" id="editInfo"><i class="iconpencil"></i>编辑</a>
+                                <h2>基础资料</h2>
+                            </div>
+                            <div class="fdata lblnickname">
+                                <p>
+                                    <span>昵称：</span><span class="value" id="UserName">没有什么不同</span>
+                                </p>
+                            </div>
+                            <div class="fdata lblbirthday">
+                                <p>
+                                    <span>生日：</span><span class="value" id="Birthday">2017-06-18</span>
+                                </p>
+                            </div>
+                            <!--<div class="fdata lblgender">
+                                <p>
+                                    <span>性别：</span><span class="value">男</span>
+                                </p>
+                            </div>-->
+                            <div class="btn_editinfo"><a id="editInfoWap" class="btnadpt bg_normal" href="">编辑基础资料</a></div>
+                        </div>
+                        <div class="framedatabox">
+                            <div class="fdata">
+                                <h3>高级设置</h3>
+                            </div>
+                            <div class="fdata click-row">
+                                <span onclick="showp()"><a class="color4a9 fr" onclick="showq()" title="点击修改" id="switchRegion">修改</a></span>
+                                <p>
+                                    <span>账户密码：  </span>
+                                    <span class="box_center"><em id="region" _code="CN"></em><i class="arrow_r"></i></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--  编辑个人资料-->
+    <link href="小米/css/zzc.css" rel="stylesheet" />
+    <script src="小米/js/zzc.js"></script>
+    <script src="小米/js/birthday.js"></script>
+    <script src="小米/js/jquery.js"></script>
+    <div class="lbOverlay" onclick="closeDiv()"></div>
+    <div class="hidden_pro_au">
+        <h3>编辑个人资料</h3>
+        <br />
+        <hr />
+        <br />
+        <dl>
+            <dd>姓　名：<label class="labelbox"><input class="nickname" type="text" id="name" name="nickname" maxlength="20" placeholder="姓 名"></label></dd>
+            <dd>
+                <div id="main">
+                    <div class="demo">
+                        <p>
+                            <label>生　日：</label>
+                            <select class="sel_year" rel="2000"></select>年
+        <select class="sel_month" rel="2"></select>月
+        <select class="sel_day" rel="14"></select>日
+                        </p>
+                    </div>
+                    <script src="js/jquery.js"></script>
+                    <script src="js/birthday.js"></script>
+                </div>
+            </dd>
+            <dd>
+                <input class="hands" type="button" value="保存" onclick="CloseSave($('#name').val())" style="height: 30px; width: 110px; border: none; background-color: orange;" />
+                <input type="text" style="height: 30px; width: 70px; border: none; visibility: hidden" />
+                <input class="hands" type="button" value="取消" onclick="    closeDiv()" style="height: 30px; width: 110px; border: none; background-color: white" />
+            </dd>
+        </dl>
+    </div>
+    <!--修改密码-->
+    <link href="小米/css/pzzc.css" rel="stylesheet" />
+    <script src="小米/js/pzzc.js"></script>
+    <div class="lbOverlayq" onclick="closeDivq()"></div>
+    <!--存用户ID-->
+    <input type="hidden" id="UserID" />
+    <div class="hidden_pro_auq">
+        <h3>修改密码</h3>
+        <br />
+        <hr />
+        <br />
+        <dl>
+            <dt>原密码：<label class="labelbox"><input class="nickname" type="text" name="nickname" maxlength="20" placeholder="原密码" /></label></dt>
+            <dd>新密码：<label class="labelbox"><input class="nickname" type="text" name="nickname" maxlength="20" placeholder="新密码" /></label>
+            </dd>
+            <br />
+            <dd>
+                <input class="hands" type="button" value="保存" onclick="closeDivq()" style="height: 30px; width: 110px; border: none; background-color: orange;" />
+                <input type="text" style="height: 30px; width: 70px; border: none; visibility: hidden" />
+                <input class="hands" type="button" value="取消" onclick="    closeDivq()" style="height: 30px; width: 110px; border: none; background-color: white" /></dd>
+        </dl>
+    </div>
+</body>
+</html>

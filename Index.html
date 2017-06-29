@@ -1,0 +1,905 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
+    <meta name="keywords" content="free mobile website templates, free mobile website template, free iphone template, free android template, free high end touch mobile templates, free high end touch mobile template" />
+    <meta name="description" content="Get free mobile website templates for Iphone , Android and High end touch mobile devices" />
+    <title>聊天机器人线聊天</title>
+    <link href="JSCSS/css/chat.css" rel="stylesheet" />
+    <link href="JSCSS/UI/themes/default/easyui.css" rel="stylesheet" />
+    <link href="JSCSS/UI/themes/icon.css" rel="stylesheet" />
+    <link href="JSCSS/css/StyleSheet1.css" rel="stylesheet" />
+    <link href="JSCSS/voice/css/style.css" rel="stylesheet" />
+    <script src="JSCSS/js/jquery-1.8.2.min.js"></script>
+    <script src="JSCSS/js/jquery.cookie.js"></script>
+    <script src="JSCSS/UI/jquery.easyui.min.js"></script>
+    <script src="JSCSS/UI/locale/easyui-lang-zh_CN.js"></script>
+    <script src="JSCSS/tts/js/fingerprint.js"></script>
+    <script src="JSCSS/tts/js/tts.min.js"></script>
+    <script src="JSCSS/tts/js/tts_demo.js"></script>
+    <script src="1.js?ver=1"></script>
+    <script>
+
+        function getRequest() {
+            var url = window.location.search; //获取url中"?"符后的字串     
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                for (var i = 0; i < strs.length; i++) {
+                    //就是这句的问题  
+                    theRequest[strs[i].split("=")[0]] = decodeURI(strs[i].split("=")[1]);
+                    //之前用了unescape()  
+                    //才会出现乱码    
+                }
+            }
+            return theRequest;
+        }
+        var arr = getRequest();
+        $(function () {
+            debugger
+            //获取用户ID
+            $("#UserID").val(arr['UserID']);
+            //获取用户ID
+            //获取用户头像路径
+            $.ajax({
+                url: "Handler/Avatar/AvatarHandler.ashx",
+                type: "post",
+                data: { UserID: arr['UserID'] },
+                dataType: "html",
+                success: function (res) {
+                    $("#touxiang").val(res);
+                }
+            });
+            //获取用户头像路径
+            debugger
+            var lebel = arr['Label'];
+            var nickname = arr['NickName'];
+            var strs = new Array(); //定义一数组 
+            strs = lebel.split(","); //字符分割 
+            for (var i = 0; i < strs.length;i++)
+            {
+                $("#uul").append("<li><a href='#'>" + strs[i] + "</a></li>"); // 添加到UL中去
+            }
+            //
+            $("#menuul").hide();
+            $("#zs").mouseover(function () {
+                $("#menuul").show();
+            })
+            $("#menuul").mouseover(function () {
+                $("#menuul").show();
+            })
+            $("#menuul").mouseout(function () {
+                $("#menuul").hide();
+            })
+            $("#ltjl").hide();
+            $("#dialog").dialog({
+                title: '星座运势',
+                width: 300,
+                height: 100
+            });
+            $("#dialog").dialog('close');
+            //
+            
+            //图片上传
+            //用户发送图片后机器人回馈一张图片
+            var aaa = $("#Button2").click(function () {
+                $.post("Handler/ImgUpload/ImgUploadHandler.ashx", { ans: $("#hi").val(), UserID: $("#UserID").val() }, function (data) {
+                    var i = "<div class='zz'><img src='/Images/Avatar/2014.jpg' /></div>" +
+                            "<div class='bubbleItem'><span class='bubble leftBubble'><img src='/" +
+                            data + "' width='80' height='100' /><span class='bottomLevel'></span>" +
+                            "<span class='topLevel'></span></span> </div> ";
+                    $(".chat01_content").append(i);
+                }, "html");
+            });
+            //传送图片原始路径到后台去
+            var btn = $("#Button1").click(function () {
+                var formData = new FormData($('#uploadForm')[0]);
+                formData.append('num', '1');//可以在已有表单数据的基础上，继续添加新的键值对
+                $.ajax({
+                    url: 'Handler/ImgUpload/ImgUploadHandler.ashx',
+                    type: 'post',
+                    cache: false,
+                    data: new FormData($('#uploadForm')[0]),
+                    processData: false,
+                    contentType: false
+                }).done(function (res) {
+                    $("#hi").val(res);
+                    var i = "<div class='dd'><img src='" + $("#touxiang").val() + "' /></div>" +
+                            "<div class='bubbleItem clearfix'><span style='font-family: Arial, Helvetica, sans-serif;'></span>" +
+                            "<span class='bubble rightBubble'><img src='/" +
+                            res + "' width='80' height='100' /><span class='bottomLevel'></span>" +
+                            "<span class='topLevel'></span></span></div>";
+                    $(".chat01_content").append(i);
+                    aaa.click();
+                }).fail(function (res) {
+                    alert(222);
+                });
+            });
+
+            //选择图片
+            $("#picc").change(function () {
+                //选择图片时触发
+                btn.click();
+            });
+            //图片上传
+
+            //聊天记录
+            $("#jl").click(function () {
+                $.ajax({
+                    url: "Handler/History/HistoryHandler.ashx",
+                    type: "post",
+                    data: { UserID: $("#UserID").val() },
+                    dataType: "json",
+                    success: function (res) {
+                        $("#pa").val("1");
+                        $("#overflow").html(res.text);
+                        fenye(res.count);
+                        $('#pp').pagination('refresh', {
+                            pageNumber: 1
+                        });
+                    }
+                });
+                $("#ltjl").show();
+            });
+            $(".close_btn").click(function () {
+                $("#ltjl").hide();
+            });
+            //聊天记录
+
+            //推送天气
+            var tianqi = $("#tianqi").click(function () {
+                var d = $("#citys").val() + '的运势'
+                f(d);
+            });
+            //推送天气
+
+            //外网查询
+            $(".take1").click(function () {
+                $.ajax({
+                    url: "Handler/Chat/ExtranetHandler.ashx?a=tq",
+                    type: "post",
+                    data: { UserID: $("#UserID").val() },
+                    dataType: "json",
+                    success: function (res) {
+                        var i = "<div class='dd'><img src='" + $("#touxiang").val() + "' /></div>" +
+                        "<div class='bubbleItem clearfix'><span style='font-family: Arial, Helvetica, sans-serif;'></span>" +
+                        "<span class='bubble rightBubble'>" +
+                        res.text1 + "<span class='bottomLevel'></span>" +
+                        "<span class='topLevel'></span></span></div>";
+                        $(".chat01_content").append(i);
+                        var j = "<div class='zz'><img src='/Images/Avatar/2014.jpg' /></div>" +
+                        "<div class='bubbleItem'><span class='bubble leftBubble'>" +
+                        res.text + "<span class='bottomLevel'></span>" +
+                        "<span class='topLevel'></span></span> </div> ";
+                        $(".chat01_content").append(j);
+                    }
+                });
+            });
+            $(".take2").click(function () {
+                $("#dialog").dialog('open');
+                $("#dialog").dialog({
+                    title: '星座运势',
+                    width: 300,
+                    height: 100
+                });
+                $("#tt tr td").first().text("星座运势");
+                $("#tttt").css("display", "block");
+                $("#ttt").css("display", "none");
+                $("#tt").css("display", "none");
+                $('#Text3').combobox({
+                    valueField: 'id',
+                    textField: 'text',
+                    data: [{
+                        id: '1',
+                        text: '白羊座'
+                    }, {
+                        id: '2',
+                        text: '金牛座'
+                    }, {
+                        id: '3',
+                        text: '双子座'
+                    }, {
+                        id: '4',
+                        text: '巨蟹座'
+                    }, {
+                        id: '5',
+                        text: '狮子座'
+                    }, {
+                        id: '6',
+                        text: '处女座'
+                    }, {
+                        id: '7',
+                        text: '天秤座'
+                    }, {
+                        id: '8',
+                        text: '天蝎座'
+                    }, {
+                        id: '9',
+                        text: '射手座'
+                    }, {
+                        id: '10',
+                        text: '摩羯座'
+                    }, {
+                        id: '11',
+                        text: '水瓶座'
+                    }, {
+                        id: '12',
+                        text: '双鱼座'
+                    }]
+                });
+            });
+            $(".take3").click(function () {
+                $("#dialog").dialog('open');
+                $("#dialog").dialog({
+                    title: '生活百科',
+                    width: 300,
+                    height: 100
+                });
+                $("#tt tr td").first().text("生活百科");
+                $("#tttt").css("display", "none");
+                $("#ttt").css("display", "none");
+                $("#tt").css("display", "block");
+            });
+            $(".take4").click(function () {
+                $("#dialog").dialog('open');
+                $("#dialog").dialog({
+                    title: '航班查询',
+                    width: 300,
+                    height: 100
+                });
+                $("#tt tr td").first().text("始飞地");
+                $("#ttt").css("display", "block");
+                $("#tttt").css("display", "none");
+                $("#tt").css("display", "none");
+            });
+            $(".take5").click(function () {
+                $("#dialog").dialog('open');
+                $("#dialog").dialog({
+                    title: '列车查询',
+                    width: 300,
+                    height: 100
+                });
+                $("#tt tr td").first().text("始发地");
+                $("#ttt").css("display", "block");
+                $("#tttt").css("display", "none");
+                $("#tt").css("display", "none");
+            });
+            $(".take6").click(function () {
+                $.ajax({
+                    url: "Handler/Chat/ExtranetHandler.ashx",
+                    type: "post",
+                    data: { UserID: $("#UserID").val(), a: "讲个笑话" },
+                    dataType: "json",
+                    success: function (res) {
+                        var i = "<div class='dd'><img src='" + $("#touxiang").val() + "' /></div>" +
+                        "<div class='bubbleItem clearfix'><span style='font-family: Arial, Helvetica, sans-serif;'></span>" +
+                        "<span class='bubble rightBubble'>" +
+                        res.text1 + "<span class='bottomLevel'></span>" +
+                        "<span class='topLevel'></span></span></div>";
+                        $(".chat01_content").append(i);
+                        var j = "<div class='zz'><img src='/Images/Avatar/2014.jpg' /></div>" +
+                        "<div class='bubbleItem'><span class='bubble leftBubble'>" +
+                        res.text + "<span class='bottomLevel'></span>" +
+                        "<span class='topLevel'></span></span> </div> ";
+                        $(".chat01_content").append(j);
+                    }
+                });
+            });
+            $(".take7").click(function () {
+                $.ajax({
+                    url: "Handler/Chat/ExtranetHandler.ashx",
+                    type: "post",
+                    data: { UserID: $("#UserID").val(), a: "说个绕口令" },
+                    dataType: "json",
+                    success: function (res) {
+                        var i = "<div class='dd'><img src='" + $("#touxiang").val() + "' /></div>" +
+                        "<div class='bubbleItem clearfix'><span style='font-family: Arial, Helvetica, sans-serif;'></span>" +
+                        "<span class='bubble rightBubble'>" +
+                        res.text1 + "<span class='bottomLevel'></span>" +
+                        "<span class='topLevel'></span></span></div>";
+                        $(".chat01_content").append(i);
+                        var j = "<div class='zz'><img src='/Images/Avatar/2014.jpg' /></div>" +
+                        "<div class='bubbleItem'><span class='bubble leftBubble'>" +
+                        res.text + "<span class='bottomLevel'></span>" +
+                        "<span class='topLevel'></span></span> </div> ";
+                        $(".chat01_content").append(j);
+                    }
+                });
+            });
+            $(".take8").click(function () {
+                $.ajax({
+                    url: "Handler/Chat/ExtranetHandler.ashx",
+                    type: "post",
+                    data: { UserID: $("#UserID").val(), a: "说个脑筋急转弯" },
+                    dataType: "json",
+                    success: function (res) {
+                        var i = "<div class='dd'><img src='" + $("#touxiang").val() + "' /></div>" +
+                        "<div class='bubbleItem clearfix'><span style='font-family: Arial, Helvetica, sans-serif;'></span>" +
+                        "<span class='bubble rightBubble'>" +
+                        res.text1 + "<span class='bottomLevel'></span>" +
+                        "<span class='topLevel'></span></span></div>";
+                        $(".chat01_content").append(i);
+                        var j = "<div class='zz'><img src='/Images/Avatar/2014.jpg' /></div>" +
+                        "<div class='bubbleItem'><span class='bubble leftBubble'>" +
+                        res.text + "<span class='bottomLevel'></span>" +
+                        "<span class='topLevel'></span></span> </div> ";
+                        $(".chat01_content").append(j);
+                    }
+                });
+            });
+            $(".take9").click(function () {
+                $.ajax({
+                    url: "Handler/Chat/ExtranetHandler.ashx",
+                    type: "post",
+                    data: { UserID: $("#UserID").val(), a: "说个顺口溜" },
+                    dataType: "json",
+                    success: function (res) {
+                        var i = "<div class='dd'><img src='" + $("#touxiang").val() + "' /></div>" +
+                        "<div class='bubbleItem clearfix'><span style='font-family: Arial, Helvetica, sans-serif;'></span>" +
+                        "<span class='bubble rightBubble'>" +
+                        res.text1 + "<span class='bottomLevel'></span>" +
+                        "<span class='topLevel'></span></span></div>";
+                        $(".chat01_content").append(i);
+                        var j = "<div class='zz'><img src='/Images/Avatar/2014.jpg' /></div>" +
+                        "<div class='bubbleItem'><span class='bubble leftBubble'>" +
+                        res.text + "<span class='bottomLevel'></span>" +
+                        "<span class='topLevel'></span></span> </div> ";
+                        $(".chat01_content").append(j);
+                    }
+                });
+            });
+            //外网查询
+            //
+            $("#vv").click(function () {
+                if ($("#tt tr td").first().text() == "生活百科") {
+                    $.ajax({
+                        url: "Handler/Chat/ExtranetHandler.ashx",
+                        type: "post",
+                        data: { UserID: $("#UserID").val(), a: $("#city").val() + "的简介" },
+                        dataType: "json",
+                        success: function (res) {
+                            var i = "<div class='dd'><img src='" + $("#touxiang").val() + "' /></div>" +
+                            "<div class='bubbleItem clearfix'><span style='font-family: Arial, Helvetica, sans-serif;'></span>" +
+                            "<span class='bubble rightBubble'>" +
+                            res.text1 + "<span class='bottomLevel'></span>" +
+                            "<span class='topLevel'></span></span></div>";
+                            $(".chat01_content").append(i);
+                            var j = "<div class='zz'><img src='/Images/Avatar/2014.jpg' /></div>" +
+                            "<div class='bubbleItem'><span class='bubble leftBubble'>" +
+                            res.text + "<span class='bottomLevel'></span>" +
+                            "<span class='topLevel'></span></span> </div> ";
+                            $(".chat01_content").append(j);
+                        }
+                    });
+                    $("#city").val("");
+                    $("#dialog").dialog('close');
+                }
+            });
+            $("#vvv").click(function () {
+                if ($("#tt tr td").first().text() == "始飞地") {
+                    $.ajax({
+                        url: "Handler/Chat/ExtranetHandler.ashx",
+                        type: "post",
+                        data: { UserID: $("#UserID").val(), a: "今天" + $("#Text1").val() + "到" + $("#Text2").val() + "的飞机" },
+                        dataType: "json",
+                        success: function (res) {
+                            var i = "<div class='dd'><img src='" + $("#touxiang").val() + "' /></div>" +
+                            "<div class='bubbleItem clearfix'><span style='font-family: Arial, Helvetica, sans-serif;'></span>" +
+                            "<span class='bubble rightBubble'>" +
+                            res.text1 + "<span class='bottomLevel'></span>" +
+                            "<span class='topLevel'></span></span></div>";
+                            $(".chat01_content").append(i);
+                            var j = "<div class='zz'><img src='/Images/Avatar/2014.jpg' /></div>" +
+                            "<div class='bubbleItem'><span class='bubble leftBubble'>" +
+                            res.text + "<span class='bottomLevel'></span>" +
+                            "<span class='topLevel'></span></span> </div> ";
+                            $(".chat01_content").append(j);
+                        }
+                    });
+                    $("#Text1").val("");
+                    $("#Text2").val("");
+                    $("#dialog").dialog('close');
+                }
+                if ($("#tt tr td").first().text() == "始发地") {
+                    $.ajax({
+                        url: "Handler/Chat/ExtranetHandler.ashx",
+                        type: "post",
+                        data: { UserID: $("#UserID").val(), a: "今天" + $("#Text1").val() + "到" + $("#Text2").val() + "的火车" },
+                        dataType: "json",
+                        success: function (res) {
+                            var i = "<div class='dd'><img src='" + $("#touxiang").val() + "' /></div>" +
+                            "<div class='bubbleItem clearfix'><span style='font-family: Arial, Helvetica, sans-serif;'></span>" +
+                            "<span class='bubble rightBubble'>" +
+                            res.text1 + "<span class='bottomLevel'></span>" +
+                            "<span class='topLevel'></span></span></div>";
+                            $(".chat01_content").append(i);
+                            var j = "<div class='zz'><img src='/Images/Avatar/2014.jpg' /></div>" +
+                            "<div class='bubbleItem'><span class='bubble leftBubble'>" +
+                            res.text + "<span class='bottomLevel'></span>" +
+                            "<span class='topLevel'></span></span> </div> ";
+                            $(".chat01_content").append(j);
+                        }
+                    });
+                    $("#Text1").val("");
+                    $("#Text2").val("");
+                    $("#dialog").dialog('close');
+                }
+            });
+            $("#vvvv").click(function () {
+                if ($("#tt tr td").first().text() == "星座运势") {
+                    $.ajax({
+                        url: "Handler/Chat/ExtranetHandler.ashx",
+                        type: "post",
+                        data: { UserID: $("#UserID").val(), a: $("#Text3").combobox("getText") + "的运势" },
+                        dataType: "json",
+                        success: function (res) {
+                            var i = "<div class='dd'><img src='" + $("#touxiang").val() + "' /></div>" +
+                            "<div class='bubbleItem clearfix'><span style='font-family: Arial, Helvetica, sans-serif;'></span>" +
+                            "<span class='bubble rightBubble'>" +
+                            res.text1 + "<span class='bottomLevel'></span>" +
+                            "<span class='topLevel'></span></span></div>";
+                            $(".chat01_content").append(i);
+                            var j = "<div class='zz'><img src='/Images/Avatar/2014.jpg' /></div>" +
+                            "<div class='bubbleItem'><span class='bubble leftBubble'>" +
+                            res.text + "<span class='bottomLevel'></span>" +
+                            "<span class='topLevel'></span></span> </div> ";
+                            $(".chat01_content").append(j);
+                        }
+                    });
+                    $('#city1').combobox('clear');
+                    $("#dialog").dialog('close');
+                }
+            });
+            //
+
+            //
+            $(".chat03_title_t").click(function () {
+                window.location.href = '/MyCenter.html?UserID=' + $("#UserID").val();
+            });
+            //
+
+            //
+            //语音自主学习
+            $("#fujian").click(function () {
+                var d = '进入学习模式';
+                e(d);
+            });
+            //
+
+            //分页
+            function fenye(count) {
+                $('#pp').pagination({
+                    showPageList: false,
+                    layout: ['first', 'prev', 'manual', 'next', 'last'],
+                    total: count,
+                    pageSize: 10,
+                    onSelectPage: function (pageNumber) {
+                        $.ajax({
+                            url: "Handler/History/HistoryHandler.ashx",
+                            type: "post",
+                            data: { a: (parseInt(pageNumber - 1)) * 10, UserID: $("#UserID").val() },
+                            dataType: "json",
+                            success: function (res) {
+                                $("#overflow").html(res.text);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+</head>
+<body class="keBody" onload="">
+    <!--查询-->
+    <div id="dialog">
+        <table id="tttt" style="display: none;">
+            <tr>
+                <td>星座运势</td>
+                <td>
+                    <input type="text" id="Text3" /></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input type="button" id="vvvv" value="确认" style="text-align: center; width: 100px;" /></td>
+            </tr>
+        </table>
+        <table id="tt">
+            <tr>
+                <td>始飞地</td>
+                <td>
+                    <input type="text" id="city" /></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input type="button" id="vv" value="确认" style="text-align: center; width: 100px;" /></td>
+            </tr>
+        </table>
+        <table id="ttt" style="display: none;">
+            <tr>
+                <td>始发地</td>
+                <td>
+                    <input type="text" id="Text1" /></td>
+            </tr>
+            <tr>
+                <td>目的地</td>
+                <td>
+                    <input type="text" id="Text2" /></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input type="button" id="vvv" value="确认" style="text-align: center; width: 100px;" /></td>
+            </tr>
+        </table>
+    </div>
+    <!--查询-->
+
+    <label id="voice" style="display: none"></label>
+    <h1 class="keTitle">聊天机器人线聊天对话框</h1>
+    <div class="kePublic">
+        <div class="content">
+            <div class="chatBox" style="position: relative">
+                <div id="ltjl" style="height: 416px; width: 400px; border: 1px solid #666; position: absolute; top: -1px; left: 563px; z-index: 100; background-color: #f2f2f2;">
+                    <div class="chat01_title">
+                        <ul class="talkTo">
+                            <li><a href="#">聊天记录</a></li>
+                        </ul>
+                        <a class="close_btn" href="#"></a>
+                    </div>
+                    <div style="width: 400px; height: 351px; overflow-x: auto;" id="overflow"></div>
+                    <div class="chat02_bar">
+                        <div id="pp" style="background: #efefef; border: 1px solid #ccc;"></div>
+                    </div>
+                </div>
+
+                <div id="menu" style="width: 168px; height: 415px; position: absolute; left: 563px; top: 0px;">
+                    <div id="zs" style="height: 29px; text-align: center; line-height: 29px; width: 167px; border-bottom: 1px solid #c6c6c6; background-image: url('/Images/CMenu/title_bg.jpg')">
+                        <a id="mm" href="#">机&nbsp;&nbsp;&nbsp;器&nbsp;&nbsp;&nbsp;人 </a>
+                    </div>
+                </div>
+
+                <div class="chatLeft">
+                    <div class="chat01">
+                        <div class="chat01_title">
+                            <ul class="talkTo" id="uul">
+                                <li><a href="#"><span id="NNname">你的标签:</span></a></li>
+                            </ul>
+                            <a class="close_btn" href="#"></a>
+                        </div>
+                        <div class="chat01_content">
+                            <div class="message_box mes1">
+                            </div>
+                            <div class="message_box mes2">
+                            </div>
+                            <div class="message_box mes3" style="display: block;">
+                            </div>
+                            <div class="message_box mes4">
+                            </div>
+                            <div class="message_box mes5">
+                            </div>
+                            <div class="message_box mes6">
+                            </div>
+                            <div class="message_box mes7">
+                            </div>
+                            <div class="message_box mes8">
+                            </div>
+                            <div class="message_box mes9">
+                            </div>
+                            <div class="message_box mes10">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat02">
+                        <div id="canvas_wrapper" style="display: none">
+                            <div style="display: inline">&spades;</div>
+                            <canvas id="volume" height="4"></canvas>
+                        </div>
+                        <div style="position: relative;" class="chat02_title">
+                            <a class="chat02_title_btn ctb01" href="#"></a>
+
+                            <!--图片上传-->
+                            <form id="uploadForm" enctype="multipart/form-data">
+                                <div class="chat02_title_btn ctb02">
+                                    <input id="picc" title="选择图片" type="file" name="picc" />
+                                </div>
+                                <input id="Button1" type="button" style="display: none;" />
+                                <input id="Button2" type="button" style="display: none;" />
+                            </form>
+                            <!--存图片路径-->
+                            <input type="hidden" id="hi" />
+                            <!--存用户ID-->
+                            <input type="hidden" id="UserID" />
+                            <!--存页码数-->
+                            <input type="hidden" id="pa" value="1" />
+                            <!--存头像路径-->
+                            <input type="hidden" id="touxiang" value="/Images/Avatar/2016.jpg" />
+                            <!--图片上传-->
+
+                            <a class="chat02_title_btn ctb03" href="#" title="选择附件" id="fujian"></a>
+                            <a id="study" style="text-align: center; line-height: 30px;" href="#" title="自主学习">
+                                <img id="imgs" style="margin-top: 3px; opacity: 0.4;" src="Images/CMenu/book.png" />
+                            </a>
+                            <div id='a' style="padding-top: 6px; position: absolute; left: 119px; top: 1px;">
+                                <a href="#" title="语音输入">
+                                    <img src="Images/CMenu/voice.png" /></a>
+                            </div>
+                            <div id='mmdel' style="padding-top: 6px; position: absolute; left: 135px; top: 0px;">
+                                <a href="#" id="model_click" title="查询模板">
+                                    <img src="Images/CMenu/model.png" style="opacity: 0.3; height: 15px; width: 15px;" />
+                                </a>
+                            </div>
+                            <label class="chat02_title_t">
+                                <a id="jl">聊天记录</a></label>
+                            <div id="model1">
+                                <div id="model">
+                                    <div class="title">
+                                        <ul>
+                                            <li class="title_name">查询模板</li>
+                                            <li class="wl_faces_close"><span>&nbsp;</span></li>
+                                        </ul>
+                                    </div>
+                                    <div id="mmenu">
+                                        <ul>
+                                            <li style="background-image: url(Images/CMenu/bb.png);">
+                                                <a class="take1" href="#">天气查询</a>
+                                            </li>
+                                            <li style="background-image: url(Images/CMenu/bb.png);">
+                                                <a class="take2" href="#">星座运势</a>
+                                            </li>
+                                            <li style="background-image: url(Images/CMenu/bb.png);">
+                                                <a class="take3" href="#">生活百科</a>
+                                            </li>
+                                            <li style="background-image: url(Images/CMenu/bb.png);">
+                                                <a class="take4" href="#">航班查询</a>
+                                            </li>
+                                            <li style="background-image: url(Images/CMenu/bb.png);">
+                                                <a class="take5" href="#">列车查询</a>
+                                            </li>
+                                            <li style="background-image: url(Images/CMenu/bb.png);">
+                                                <a class="take6" href="#">笑话大全</a>
+                                            </li>
+                                            <li style="background-image: url(Images/CMenu/bb.png);">
+                                                <a class="take7" href="#">绕口令</a>
+                                            </li>
+                                            <li style="background-image: url(Images/CMenu/bb.png);">
+                                                <a class="take8" href="#">脑筋急转弯</a>
+                                            </li>
+                                            <li style="background-image: url(Images/CMenu/bb.png);">
+                                                <a class="take9" href="#">顺口溜</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="wlf_icon">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="wl_faces_box">
+                                <div class="wl_faces_content">
+                                    <div class="title">
+                                        <ul>
+                                            <li class="title_name">常用表情</li>
+                                            <li class="wl_faces_close"><span>&nbsp;</span></li>
+                                        </ul>
+                                    </div>
+
+                                    <!--聊天表情-->
+                                    <div class="wl_faces_main">
+                                        <ul>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_01.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_02.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_03.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_04.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_05.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_06.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_07.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_08.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_09.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_10.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_11.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_12.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_13.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_14.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_15.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_16.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_17.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_18.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_19.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_20.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_21.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_22.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_23.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_24.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_25.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_26.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_27.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_28.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_29.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_30.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_31.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_32.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_33.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_34.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_35.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_36.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_37.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_38.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_39.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_40.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_41.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_42.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_43.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_44.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_45.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_46.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_47.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_48.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_49.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_50.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_51.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_52.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_53.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_54.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_55.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_56.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_57.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_58.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_59.gif" /></a></li>
+                                            <li><a href="#">
+                                                <img src="Images/Expression/emo_60.gif" /></a></li>
+                                        </ul>
+                                    </div>
+                                    <!--聊天表情-->
+
+                                </div>
+                                <div class="wlf_icon">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat02_content">
+                            <textarea id="textarea"></textarea>
+                        </div>
+                        <div class="chat02_bar">
+                            <ul>
+                                <li style="right: 5px; top: 5px;"><a href="#">
+                                    <img src="Images/CMenu/send_btn.jpg" /></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chatRight">
+                    <div class="chat03" style="overflow: hidden">
+                        <div class="chat03_title">
+                            <label class="chat03_title_t">
+                            </label>
+                        </div>
+                        <div class="chat03_content" style="margin-left: -270px;">
+                            <embed src="Images/Flash/flash4548.swf" id="mySwf" style="background-color: white" allowscriptaccess="always" quality="high" width="700" height="340" swliveconnect="false" wmode="opaque" flashvars="name=pmx&age=44" />
+                        </div>
+                    </div>
+                </div>
+                <div style="clear: both;">
+                </div>
+            </div>
+        </div>
+        <input type="button" id="tianqi" style="display: none;" />
+        <input type="hidden" id="citys" />
+        <!--效果html结束-->
+    </div>
+    <div class="keBottom">
+    </div>
+
+    <!--语音-->
+    <script src="JSCSS/voice/js/fingerprint2.min.js"></script>
+    <script src="JSCSS/voice/js/iat.all.js"></script>
+    <script src="JSCSS/voice/js/demo.js"></script>
+    <!--语音-->
+</body>
+</html>
+<script>
+    $(function () {
+        //定时推送
+        var date = new Date();
+        var year = date.getFullYear();
+        var month = date.getMonth() + 1;
+        var strDate = date.getDate();
+        var num = parseInt(year) + parseInt(month) + parseInt(strDate);
+        var cookie_Date = $.cookie("cookieDate");
+        if (cookie_Date != null) {
+            //判断用户ID上是否发生改变
+            var cookieUserID = $("#UserID").val();
+            //判断日期是非发生改变
+            if (cookie_Date != num || $.cookie("cookieUserID") != cookieUserID) {
+                $.ajax({
+                    url: 'Handler/Push/PushHandler.ashx',
+                    type: 'post',
+                    data: { UserID: $("#UserID").val() },
+                    dataType: "json",
+                    success: function (res) {
+                        $("#citys").val(res.city);
+                        tianqi.click();
+                        $.cookie('cookieDate', num);
+                        $.cookie("cookieUserID", res.UserID);
+                    }
+                });
+            }
+        }
+        else {
+            $.cookie("cookieDate", num, { expires: 1 });
+            $.ajax({
+                url: 'Handler/Push/PushHandler.ashx',
+                type: 'post',
+                dataType: "json",
+                data: { UserID: $("#UserID").val() },
+                success: function (res) {
+                    $("#citys").val(res.city);
+                    tianqi.click();
+                    //存用户ID
+                    $.cookie("cookieUserID", res.UserID);
+                }
+            });
+        }
+        //定时推送
+    });
+</script>

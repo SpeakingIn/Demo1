@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link href="JSCSS/css/Login.css" rel="stylesheet" />
+    <script src="JSCSS/js/jquery-1.8.2.min.js"></script>
+    <script src="JSCSS/My97DatePicker/WdatePicker.js"></script>
+    <script>
+        $(function () {
+            //验证用户帐号是否存在
+            $("#UserName").blur(function () {
+                $.ajax({
+                    url: "Handler/Register/RegisterHandler.ashx?a=select",
+                    type: "post",
+                    dataType: "html",
+                    data: { UserName: $("#UserName").val() },
+                    success: function (res) {
+                        $("#lel").text(res);
+                    }
+                });
+            });
+
+            //登录验证进入后台
+            $("#btn").click(function () {
+                $.ajax({
+                    url: "Handler/Register/RegisterHandler.ashx",
+                    type: "post",
+                    dataType: "html",
+                    data: { UserName: $("#UserName").val(), UserPwd: $("#UserPwd").val(), City: $("#City").val() },
+                    success: function (res) {
+                        if (res == "注册成功") {
+                            alert(res);
+                            window.location.href = '/Login.html';
+                        }
+                        else {
+                            alert(res);
+                            $("#UserPwd").val("");
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div id="login" style="width: 500px;">
+        <h1 style="margin-left: 80px;">Register</h1>
+        <form method="post">
+            <input type="text" required="required" placeholder="用户名" name="u" id="UserName" />
+            &nbsp;&nbsp;<label style="color: #f00;" id="lel"></label>
+            <input type="password" required="required" placeholder="密码" name="p" id="UserPwd" />
+            <input type="text" required="required" placeholder="出生日期" name="u" id="City" class="WdatePicker" onclick="WdatePicker()" />
+            <button class="but" type="button" id="btn">注册</button>
+        </form>
+    </div>
+</body>
+</html>
